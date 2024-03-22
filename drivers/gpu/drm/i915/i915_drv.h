@@ -38,7 +38,7 @@
 #include <linux/xarray.h>
 
 #include <drm/drm_connector.h>
-#include <drm/i915_cp_fw_hdcp_interface.h>
+#include <drm/i915_mei_hdcp_interface.h>
 #include <drm/ttm/ttm_device.h>
 
 #include "display/intel_cdclk.h"
@@ -898,7 +898,7 @@ struct drm_i915_private {
 	} debuggers;
 #endif
 
-	struct i915_hdcp_fw_master *hdcp_master;
+	struct i915_hdcp_comp_master *hdcp_master;
 	bool hdcp_comp_added;
 
 	/* Mutex to protect the above hdcp component related values. */

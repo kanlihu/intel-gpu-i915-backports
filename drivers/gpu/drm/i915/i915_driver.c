@@ -1306,7 +1306,7 @@ void i915_driver_register(struct drm_i915_private *dev_priv)
 	if (i915_switcheroo_register(dev_priv))
 		drm_err(&dev_priv->drm, "Failed to register vga switcheroo!\n");
 
-	intel_vsec_init(dev_priv);
+	//intel_vsec_init(dev_priv);
 	pvc_wa_allow_rc6(dev_priv);
 }
 

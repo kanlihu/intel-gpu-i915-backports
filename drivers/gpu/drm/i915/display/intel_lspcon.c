@@ -23,8 +23,9 @@
  *
  */
 
+#include <drm/display/drm_dp_dual_mode_helper.h>
+#include <drm/display/drm_hdmi_helper.h>
 #include <drm/drm_atomic_helper.h>
-#include <drm/drm_dp_dual_mode_helper.h>
 #include <drm/drm_edid.h>
 
 #include "intel_de.h"
@@ -546,7 +547,7 @@ void lspcon_set_infoframes(struct intel_encoder *encoder,
 		frame.avi.colorspace = HDMI_COLORSPACE_RGB;
 
 	/* Set the Colorspace as per the HDMI spec */
-	drm_hdmi_avi_infoframe_colorspace(&frame.avi, conn_state);
+	drm_hdmi_avi_infoframe_colorimetry(&frame.avi, conn_state);
 
 	/* nonsense combination */
 	drm_WARN_ON(encoder->base.dev, crtc_state->limited_color_range &&

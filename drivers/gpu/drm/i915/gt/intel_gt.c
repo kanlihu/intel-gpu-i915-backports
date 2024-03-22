@@ -533,8 +533,6 @@ void intel_gt_flush_ggtt_writes(struct intel_gt *gt)
 void intel_gt_chipset_flush(struct intel_gt *gt)
 {
 	wmb();
-	if (GRAPHICS_VER(gt->i915) < 6)
-		intel_ggtt_gmch_flush();
 }
 
 void intel_gt_driver_register(struct intel_gt *gt)

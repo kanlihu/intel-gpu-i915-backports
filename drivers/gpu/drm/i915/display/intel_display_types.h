@@ -42,8 +42,10 @@
 #include <drm/drm_rect.h>
 #include <drm/drm_vblank.h>
 #include <drm/drm_vblank_work.h>
-#include <drm/i915_cp_fw_hdcp_interface.h>
+#include <drm/drm_framebuffer.h>
 #include <media/cec-notifier.h>
+#include <drm/i915_mei_hdcp_interface.h>
+
 
 #include "i915_vma.h"
 #include "i915_vma_types.h"

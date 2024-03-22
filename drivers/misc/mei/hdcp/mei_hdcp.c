@@ -23,7 +23,6 @@
 #include <linux/component.h>
 #include <drm/drm_connector.h>
 #include <drm/i915_component.h>
-#include <drm/i915_cp_fw_hdcp_interface.h>
 
 #include "mei_hdcp.h"
 #ifdef BPM_ADD_MODULE_VERSION_MACRO_IN_ALL_MOD

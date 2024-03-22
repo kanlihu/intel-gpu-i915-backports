@@ -1625,8 +1625,7 @@ static int ggtt_probe_hw(struct i915_ggtt *ggtt, struct intel_gt *gt)
 		ret = gen8_gmch_probe(ggtt);
 	else if (GRAPHICS_VER(i915) >= 6)
 		ret = gen6_gmch_probe(ggtt);
-	else
-		ret = intel_ggtt_gmch_probe(ggtt);
+
 	if (ret)
 		return ret;
 
@@ -1720,9 +1719,6 @@ err:
 
 int i915_ggtt_enable_hw(struct drm_i915_private *i915)
 {
-	if (GRAPHICS_VER(i915) < 6)
-		return intel_ggtt_gmch_enable_hw(i915);
-
 	return 0;
 }
 

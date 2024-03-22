@@ -3,32 +3,6 @@ config DRM_I915
 	tristate "Intel 8xx/9xx/G3x/G4x/HD Graphics"
 	depends on m
 	depends on DRM
-	depends on X86 && PCI
-	select INTEL_GTT if X86
-	depends on INTERVAL_TREE
-	# we need shmfs for the swappable backing store, and in particular
-	# the shmem_readpage() which depends upon tmpfs
-	depends on SHMEM
-	depends on TMPFS
-	depends on DRM_KMS_HELPER
-	depends on DRM_PANEL
-	depends on DRM_MIPI_DSI
-	depends on RELAY
-	depends on IRQ_WORK
-	# i915 depends on ACPI_VIDEO when ACPI is enabled
-	# but for select to work, need to select ACPI_VIDEO's dependencies, ick
-	select BACKLIGHT_CLASS_DEVICE if ACPI
-	select INPUT if ACPI
-	select ACPI_VIDEO if ACPI
-	select ACPI_BUTTON if ACPI
-	depends on SYNC_FILE
-	select IOSF_MBI if X86
-	depends on CRC32
-	select SND_HDA_I915 if SND_HDA_CORE
-	select CEC_CORE if CEC_NOTIFIER
-	depends on VMAP_PFN
-	depends on AUXILIARY_BUS || MFD_CORE
-	depends on MTD
 	help
 	  Choose this option if you have a system that has "Intel Graphics
 	  Media Accelerator" or "HD Graphics" integrated graphics,
