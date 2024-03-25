@@ -32,7 +32,7 @@ subdir-ccflags-y += -I$(src)
 # Please keep these build lists sorted!
 
 # core driver code
-i915-y += i915_driver.o \
+i915_ag-y += i915_driver.o \
 	  i915_config.o \
 	  i915_drm_client.o \
 	  i915_getparam.o \
@@ -70,7 +70,7 @@ i915-y += i915_driver.o \
 $(obj)/i915_driver.o: $(wildcard include/config/DRM_I915_CHICKEN_*)
 
 # core library code
-i915-y += \
+i915_ag-y += \
 	dma_resv_utils.o \
 	i915_memcpy.o \
 	i915_mm.o \
@@ -79,15 +79,15 @@ i915-y += \
 	i915_syncmap.o \
 	i915_user_extensions.o
 
-i915-$(CONFIG_COMPAT)   += i915_ioc32.o
-i915-$(CONFIG_DEBUG_FS) += \
+i915_ag-$(CONFIG_COMPAT)   += i915_ioc32.o
+i915_ag-$(CONFIG_DEBUG_FS) += \
 	i915_debugfs.o \
 	i915_debugfs_params.o \
 	display/intel_display_debugfs.o \
 	display/intel_pipe_crc.o
 
-i915-$(CONFIG_PERF_EVENTS) += i915_pmu.o
-i915-$(CPTCFG_DRM_I915_DEBUGGER) += i915_debugger.o
+i915_ag-$(CONFIG_PERF_EVENTS) += i915_pmu.o
+i915_ag-$(CPTCFG_DRM_I915_DEBUGGER) += i915_debugger.o
 
 # "Graphics Technology" (aka we talk to the gpu)
 gt-y += \
@@ -156,7 +156,7 @@ gt-y += \
 	gt/gen7_renderstate.o \
 	gt/gen8_renderstate.o \
 	gt/gen9_renderstate.o
-i915-y += $(gt-y)
+i915_ag-y += $(gt-y)
 
 # GEM (Graphics Execution Management) code
 gem-y += \
@@ -185,7 +185,7 @@ gem-y += \
 	gem/i915_gem_wait.o \
 	gem/i915_gem_wait_user_fence.o \
 	gem/i915_gemfs.o
-i915-y += \
+i915_ag-y += \
 	  $(gem-y) \
 	  i915_active.o \
 	  i915_buddy.o \
@@ -211,7 +211,7 @@ i915-$(CPTCFG_DRM_I915_SVM) += i915_svm.o \
 i915-$(CPTCFG_DRM_I915_ATS) += i915_addr_trans_svc.o
 
 # general-purpose microcontroller (GuC) support
-i915-y += gt/uc/intel_uc.o \
+i915_ag-y += gt/uc/intel_uc.o \
 	  gt/uc/intel_uc_debugfs.o \
 	  gt/uc/intel_uc_fw.o \
 	  gt/uc/intel_guc.o \
@@ -233,10 +233,10 @@ i915-y += gt/uc/intel_uc.o \
 	  gt/uc/intel_gsc_uc.o
 
 # graphics system controller (GSC) support
-i915-y += gt/intel_gsc.o
+i915_ag-y += gt/intel_gsc.o
 
 # graphics spi device (DGFX) support
-i915-y += spi/intel_spi.o
+i915_ag-y += spi/intel_spi.o
 
 # Virtualization support
 iov-y += \
@@ -256,18 +256,18 @@ iov-y += \
 	gt/iov/intel_lmtt.o \
 	gt/iov/xehpsdv_lmtt.o \
 	gt/iov/pvc_lmtt.o
-i915-y += $(iov-y)
+i915_ag-y += $(iov-y)
 
 iov-$(CPTCFG_DRM_I915_SELFTEST) += \
 	gt/iov/selftests/iov_selftest_actions.o \
 	gt/iov/selftests/iov_selftest_utils.o
-i915-y += $(iov-$(CPTCFG_DRM_I915_SELFTEST))
+i915_ag-y += $(iov-$(CPTCFG_DRM_I915_SELFTEST))
 
 # graphics hardware monitoring (HWMON) support
-i915-$(CONFIG_HWMON) += i915_hwmon.o
+i915_ag-$(CONFIG_HWMON) += i915_hwmon.o
 
 # modesetting core code
-i915-y += \
+i915_ag-y += \
 	display/hsw_ips.o \
 	display/intel_atomic.o \
 	display/intel_atomic_plane.o \
@@ -316,14 +316,14 @@ i915-y += \
 	display/i9xx_plane.o \
 	display/skl_scaler.o \
 	display/skl_universal_plane.o
-i915-$(CONFIG_ACPI) += \
+i915_ag-$(CONFIG_ACPI) += \
 	display/intel_acpi.o \
 	display/intel_opregion.o
-i915-$(CONFIG_DRM_FBDEV_EMULATION) += \
+i915_ag-$(CONFIG_DRM_FBDEV_EMULATION) += \
 	display/intel_fbdev.o
 
 # modesetting output/encoder code
-i915-y += \
+i915_ag-y += \
 	display/dvo_ch7017.o \
 	display/dvo_ch7xxx.o \
 	display/dvo_ivch.o \
@@ -364,15 +364,15 @@ i915-y += \
 	display/vlv_dsi.o \
 	display/vlv_dsi_pll.o
 
-i915-y += i915_perf.o i915_perf_stall_cntr.o
+i915_ag-y += i915_perf.o i915_perf_stall_cntr.o
 
 # Protected execution platform (PXP) support. Base support is required for HuC
-i915-y += \
+i915_ag-y += \
 	pxp/intel_pxp.o \
 	pxp/intel_pxp_tee.o \
 	pxp/intel_pxp_huc.o
 
-i915-$(CPTCFG_DRM_I915_PXP) += \
+i915_ag-$(CPTCFG_DRM_I915_PXP) += \
 	pxp/intel_pxp_cmd.o \
 	pxp/intel_pxp_debugfs.o \
 	pxp/intel_pxp_irq.o \
@@ -380,8 +380,8 @@ i915-$(CPTCFG_DRM_I915_PXP) += \
 	pxp/intel_pxp_session.o
 
 # Post-mortem debug and GPU hang state capture
-i915-$(CPTCFG_DRM_I915_CAPTURE_ERROR) += i915_gpu_error.o
-i915-$(CPTCFG_DRM_I915_SELFTEST) += \
+i915_ag-$(CPTCFG_DRM_I915_CAPTURE_ERROR) += i915_gpu_error.o
+i915_ag-$(CPTCFG_DRM_I915_SELFTEST) += \
 	gem/selftests/i915_gem_client_blt.o \
 	gem/selftests/igt_gem_utils.o \
 	selftests/intel_scheduler_helpers.o \
@@ -397,13 +397,13 @@ i915-$(CPTCFG_DRM_I915_SELFTEST) += \
 	display/selftests/selftest_display.o
 
 # virtual gpu code
-i915-y += i915_vgpu.o
+i915_ag-y += i915_vgpu.o
 
-i915-$(CPTCFG_DRM_I915_GVT) += \
+i915_ag-$(CPTCFG_DRM_I915_GVT) += \
 	intel_gvt.o
 include $(src)/gvt/Makefile
 
-obj-$(CPTCFG_DRM_I915) += i915.o
+obj-$(CPTCFG_DRM_I915) += i915_ag.o
 obj-$(CPTCFG_DRM_I915_GVT_KVMGT) += gvt/kvmgt.o
 obj-$(CPTCFG_DRM_I915_INTEL_FABRIC) += fabric/
 

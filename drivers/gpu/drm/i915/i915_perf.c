@@ -5536,7 +5536,7 @@ static struct ctl_table oa_table[] = {
 
 static struct ctl_table i915_root[] = {
 	{
-	 .procname = "i915",
+	 .procname = "i915_ag",
 	 .maxlen = 0,
 	 .mode = 0555,
 	 .child = oa_table,
