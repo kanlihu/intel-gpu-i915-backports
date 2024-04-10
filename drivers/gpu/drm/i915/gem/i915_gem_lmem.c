@@ -2081,6 +2081,18 @@ lmem_put_pages(struct drm_i915_gem_object *obj, struct sg_table *pages)
 	struct intel_memory_region *mem = obj->mm.region.mem;
 	unsigned int clear = BIT(INTEL_MEMORY_CLEAR_FREE);
 	bool dirty;
+	if (obj->flags & I915_BO_DEVICEPTR) {
+		spin_lock(&mem->objects.lock);
+		list_del_init(&obj->mm.region.link);
+		spin_unlock(&mem->objects.lock);
+
+		// ? i915_drm_client_make_resident(obj, false);
+
+		sg_free_table(pages);
+		kfree(pages);
+
+		return 0;
+	}
 
 	if (need_swap(obj)) {
 		int err;

@@ -1967,8 +1967,9 @@ static int pf_provision_lmem(struct intel_iov *iov, unsigned int id, u64 size)
 	if (unlikely(err))
 		goto err_unpin;
 
-	IOV_DEBUG(iov, "VF%u provisioned LMEM %zu (%zuM)\n",
-		  id, obj->base.size, obj->base.size / SZ_1M);
+	IOV_DEBUG(iov, "VF%u provisioned LMEM %zu (%zuM), offset = %llu\n",
+		  id, obj->base.size, obj->base.size / SZ_1M,
+		  i915_gem_object_lmem_offset(obj));
 	config->lmem_obj = obj;
 	goto finish;
 

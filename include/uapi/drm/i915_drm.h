@@ -473,6 +473,8 @@ typedef struct _drm_i915_sarea {
 #define DRM_I915_GEM_VM_CREATE		0x3a
 #define DRM_I915_GEM_VM_DESTROY		0x3b
 #define DRM_I915_GEM_CREATE_EXT		0x3c
+#define DRM_I915_GEM_DEVICEPTR		0x3d
+
 /* Must be kept compact -- no holes */
 
 #define DRM_IOCTL_I915_INIT		DRM_IOW( DRM_COMMAND_BASE + DRM_I915_INIT, drm_i915_init_t)
@@ -537,6 +539,7 @@ typedef struct _drm_i915_sarea {
 #define DRM_IOCTL_I915_QUERY			DRM_IOWR(DRM_COMMAND_BASE + DRM_I915_QUERY, struct drm_i915_query)
 #define DRM_IOCTL_I915_GEM_VM_CREATE	DRM_IOWR(DRM_COMMAND_BASE + DRM_I915_GEM_VM_CREATE, struct drm_i915_gem_vm_control)
 #define DRM_IOCTL_I915_GEM_VM_DESTROY	DRM_IOW (DRM_COMMAND_BASE + DRM_I915_GEM_VM_DESTROY, struct drm_i915_gem_vm_control)
+#define DRM_IOCTL_I915_GEM_DEVICEPTR			DRM_IOWR (DRM_COMMAND_BASE + DRM_I915_GEM_DEVICEPTR, struct drm_i915_gem_deviceptr)
 
 /* Allow drivers to submit batchbuffers directly to hardware, relying
  * on the security mechanisms provided by hardware.
@@ -2425,6 +2428,28 @@ struct drm_i915_reset_stats {
 	__u32 batch_pending;
 
 	__u32 pad;
+};
+
+struct drm_i915_gem_deviceptr_item {
+	__u64 offset;
+	__u64 size;
+};
+
+/**
+ * Create a DRM GEM object from scatter list of device memory addresses
+ */
+struct drm_i915_gem_deviceptr {
+	__u32 vid;
+	/* Must be zero */
+	__u32 flags;
+	__u32 count;
+	/**
+	 * @handle: Returned handle for the object.
+	 *
+	 * Object handles are nonzero.
+	 */
+	__u32 handle;
+	struct drm_i915_gem_deviceptr_item *items;
 };
 
 /**

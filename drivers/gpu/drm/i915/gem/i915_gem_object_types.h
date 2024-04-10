@@ -324,6 +324,8 @@ struct drm_i915_gem_object {
 #define I915_BO_FAULT_CLEAR	BIT(15)
 #define I915_BO_SYNC_HINT	BIT(16)
 #define I915_BO_FABRIC		BIT(17)
+/* This BO is created out of scatter list of local memory by deviceptr ioctl. */
+#define I915_BO_DEVICEPTR		BIT(31)
 
 	/**
 	 * @pat_index: The desired PAT index.

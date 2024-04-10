@@ -583,3 +583,168 @@ i915_gem_userptr_ioctl(struct drm_device *dev,
 	args->handle = handle;
 	return 0;
 }
+
+int
+i915_gem_deviceptr_ioctl(struct drm_device *dev,
+			 void *data,
+			 struct drm_file *file)
+{
+	static struct lock_class_key lock_class;
+	struct drm_i915_private *i915 = to_i915(dev);
+	struct drm_i915_gem_deviceptr *args = data;
+	struct drm_i915_gem_deviceptr_item *items;
+	struct intel_memory_region *lmem_mem_region;
+	struct drm_i915_gem_object *lmem_obj;
+	struct drm_i915_gem_object *new_obj;
+	struct intel_iov *iov = &to_gt(i915)->iov;
+	u32 handle;
+	size_t new_obj_size = 0;
+	struct sg_table *st;
+	struct scatterlist *sg;
+	unsigned int sg_page_sizes = 0;
+	unsigned int split_count = 0, split_capacity = 8;
+	struct {
+		dma_addr_t offset;
+		unsigned int size;
+	} *split;
+	int ret, i;
+
+	if (!IS_DGFX(i915) || IS_SRIOV_VF(i915)) {
+		return -ENODEV;
+	}
+
+	items = memdup_user(args->items, args->count * sizeof(*items));
+	if (IS_ERR(items))
+		return PTR_ERR(items);
+
+	/* Validdate ranges provided by user */
+	if (args->vid < 1 || args->vid > iov->pf.provisioning.num_pushed ||
+		args->count > SG_MAX_SINGLE_ALLOC) {
+		dev_err(dev->dev, "VF id is out of range");
+		return -EINVAL;
+	}
+
+	lmem_obj = iov->pf.provisioning.configs[args->vid].lmem_obj;
+	if (!lmem_obj) {
+		ret = -ENOENT;
+		goto err_memdup;
+	}
+	lmem_mem_region = lmem_obj->mm.region.mem;
+	dev_dbg(dev->dev, "%s: lmem_obj size = %lu, "
+		"lmem_obj nents = %u\n",
+		__func__, lmem_obj->base.size, lmem_obj->mm.pages->nents);
+
+	for (i = 0; i < args->count; ++i) {
+		dev_dbg(dev->dev, "deviceptr scatter list "
+			"i = %d, offset = 0x%llx, size = 0x%llx\n",
+			i, items[i].offset, items[i].size);
+		if (items[i].offset + items[i].size > lmem_obj->base.size) {
+			dev_err(dev->dev, "deviceptr scatter list out of range, "
+				"i = %d, offset = 0x%llx, size = 0x%llx\n",
+				i, items[i].offset, items[i].size);
+			return -EINVAL;
+		}
+	}
+
+	split = kmalloc(split_capacity * sizeof(*split), GFP_KERNEL);
+	if (!split) {
+		ret = -ENOMEM;
+		goto err_memdup;
+	}
+
+	for (i = 0; i < args->count; ++i) {
+		unsigned int accumulated_len = 0;
+		while (accumulated_len < items[i].size) {
+			unsigned int len;
+			dma_addr_t offset;
+			pgoff_t page_offset;
+			if (split_count == split_capacity) {
+				split_capacity *= 2;
+				split = krealloc(split, split_count * sizeof(*split), GFP_KERNEL);
+				if (!split) {
+					ret = -ENOMEM;
+					goto err_memdup;
+				}
+			}
+			page_offset = (items[i].offset + accumulated_len) >> PAGE_SHIFT;
+			offset = i915_gem_object_get_dma_address_len(lmem_obj,
+								page_offset,
+								&len);
+			len = min_t(u64, len, items[i].size - accumulated_len);
+			new_obj_size += len;
+			accumulated_len += len;
+			split[split_count].offset = offset;
+			split[split_count].size = len;
+			++split_count;
+		}
+	}
+	i915_gem_flush_free_objects(i915);
+
+	/* Contruct scatter list table out of passed in parameters. */
+	st = kmalloc(sizeof(*st), GFP_KERNEL);
+	if (!st)
+		return -ENOMEM;
+
+	if (sg_alloc_table(st,
+			   min_t(unsigned int, split_count, SG_MAX_SINGLE_ALLOC),
+			   I915_GFP_ALLOW_FAIL)) {
+		ret = -ENOMEM;
+		goto error_sgt;
+	}
+
+	st->nents = split_count;
+	sg = st->sgl;
+	for (i = 0; i < st->nents; ++i) {
+		sg_dma_address(sg) = split[i].offset;
+		sg_dma_len(sg) = split[i].size;
+		sg_set_page(sg, NULL, 0, 0);
+		if (i == st->nents - 1)
+			sg_mark_end(sg);
+		sg = sg_next(sg);
+	}
+	sg_page_sizes = i915_sg_dma_sizes(st->sgl);
+
+	new_obj = i915_gem_object_alloc();
+	if (!new_obj) {
+		ret = -ENOMEM;
+		goto error_sg;
+	}
+
+	drm_gem_private_object_init(dev, &new_obj->base, new_obj_size);
+	i915_gem_object_init(new_obj, &i915_gem_lmem_obj_ops, &lock_class,
+			     I915_BO_ALLOC_USER |
+			     I915_BO_DEVICEPTR);
+	new_obj->read_domains = I915_GEM_DOMAIN_WC | I915_GEM_DOMAIN_GTT;
+	i915_gem_object_set_cache_coherency(new_obj, I915_CACHE_NONE);
+
+	i915_gem_object_init_memory_region(new_obj, lmem_mem_region);
+
+	ret = drm_gem_handle_create(file, &new_obj->base, &handle);
+
+	/* drop reference from allocate - handle holds it now */
+	i915_gem_object_put(new_obj);
+	if (ret) {
+		goto error_obj_alloc;
+	}
+
+	args->handle = handle;
+
+	dev_dbg(dev->dev, "%s: sg_page_sizes = %u\n", __func__, sg_page_sizes);
+	/* Effectively pin the pages. */
+	__i915_gem_object_set_pages(new_obj, st, sg_page_sizes);
+	atomic_inc(&new_obj->mm.pages_pin_count);
+	kfree(split);
+	kfree(items);
+	return 0;
+
+error_obj_alloc:
+	i915_gem_object_free(new_obj);
+error_sg:
+	sg_free_table(st);
+error_sgt:
+	kfree(st);
+	kfree(split);
+err_memdup:
+	kfree(items);
+	return ret;
+}
