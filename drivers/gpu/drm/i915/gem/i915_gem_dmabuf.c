@@ -32,6 +32,11 @@ MODULE_IMPORT_NS(DMA_BUF);
 
 I915_SELFTEST_DECLARE(static bool force_different_devices;)
 
+static bool is_virtio_gpu(struct dma_buf_attachment *attach)
+{
+	return strcmp(attach->dev->driver->name, "virtio-pci") == 0;
+}
+
 static const struct drm_i915_gem_object_ops i915_gem_object_dmabuf_ops;
 static void i915_gem_unmap_dma_buf(struct dma_buf_attachment *attach,
 				   struct sg_table *sgt,
@@ -138,6 +143,8 @@ i915_gem_copy_map_dma_buf(struct dma_buf_attachment *attach,
 	do {
 		struct intel_memory_region *mem = obj->mm.region.mem;
 		struct scatterlist *src;
+		bool virtio_gpu = is_virtio_gpu(attach);
+		u64 region_start = mem->region.start;
 		u64 dma_offset;
 
 		dma_offset = 0;
@@ -153,17 +160,29 @@ i915_gem_copy_map_dma_buf(struct dma_buf_attachment *attach,
 
 			GEM_BUG_ON(!dst);
 			sg_set_page(dst, sg_page(src), src->length, 0);
+			// drm_dbg(obj->base.dev,
+			// 	"map dmabuf: "
+			// 	"region_start = %llu, "
+			// 	"io_start = %llu, "
+			// 	"sg_dma_address(src) = %llx, "
+			// 	"sg_dma_len(src) = %u\n",
+			// 	region_start, mem->io_start,
+			// 	sg_dma_address(src), sg_dma_len(src));
 
 			if (map_dir == DMA_NONE) {
 				addr = sg_dma_address(src);
 				len = sg_dma_len(src);
 			} else if (dma_offset) {
 				len = sg_dma_len(src);
-				addr = dma_map_resource(attach->dev,
-							sg_dma_address(src) + dma_offset,
-							len,
-							map_dir,
-							DMA_ATTR_SKIP_CPU_SYNC);
+				if (virtio_gpu && attach->peer2peer) {
+					addr = sg_dma_address(src) - region_start;
+				} else {
+					addr = dma_map_resource(attach->dev,
+								sg_dma_address(src) + dma_offset,
+								len,
+								map_dir,
+								DMA_ATTR_SKIP_CPU_SYNC);
+				}
 			} else {
 				len = src->length;
 				addr = dma_map_page_attrs(attach->dev,
@@ -450,6 +469,19 @@ static int i915_gem_dmabuf_attach(struct dma_buf *dmabuf,
 	int p2p_distance;
 	int fabric;
 	int err;
+
+	/* Share LMEM objects with virtio-GPU, without migrating the objects
+	 * to system memory.  Allow this code path only if allow_p2p flag
+	 * is set in virtio-GPU, meaning that the virtio-GPU will scan-out
+	 * to dGPU display port. */
+	if (is_virtio_gpu(attach) && attach->peer2peer
+	    && i915_gem_object_is_lmem(obj)) {
+		drm_info(obj->base.dev, "pin LMEM object for virtio-GPU\n");
+		err = i915_gem_object_pin_pages(obj);
+		if (err)
+			drm_err(obj->base.dev, "failed to pin object\n");
+		return err;
+	}
 
 	fabric = update_fabric(dmabuf, attach->importer_priv);
 	p2p_distance = object_to_attachment_p2p_distance(obj, attach);
