@@ -123,14 +123,27 @@ i915_gem_copy_map_dma_buf(struct dma_buf_attachment *attach,
 		struct drm_i915_gem_object *sobj;
 
 		nents = 0;
-		for_each_object_segment(sobj, obj)
-			nents += sobj->mm.pages->orig_nents;
+		for_each_object_segment(sobj, obj) {
+			ret = i915_gem_object_migrate_sync(sobj);
+			if (ret)
+				goto err_free;
+
+			nents += sobj->mm.pages->nents;
+		}
 
 		obj = i915_gem_object_first_segment(obj);
 	} else {
-		nents = obj->mm.pages->orig_nents;
-		if (obj->pair)
-			nents += obj->pair->mm.pages->orig_nents;
+		ret = i915_gem_object_migrate_sync(obj);
+		if (ret)
+			goto err_unmap;
+		nents = obj->mm.pages->nents;
+
+		if (obj->pair) {
+			ret = i915_gem_object_migrate_sync(obj->pair);
+			if (ret)
+				goto err_free;
+			nents += obj->pair->mm.pages->nents;
+		}
 	}
 
 	if (sg_alloc_table(sgt, nents, I915_GFP_ALLOW_FAIL)) {
@@ -151,23 +164,11 @@ i915_gem_copy_map_dma_buf(struct dma_buf_attachment *attach,
 		if (i915_gem_object_is_lmem(obj))
 			dma_offset = mem->io_start - mem->region.start;
 
-		ret = i915_gem_object_migrate_sync(obj);
-		if (ret)
-			goto err_unmap;
-
 		for (src = obj->mm.pages->sgl; src; src = __sg_next(src)) {
 			dma_addr_t addr, len;
 
 			GEM_BUG_ON(!dst);
 			sg_set_page(dst, sg_page(src), src->length, 0);
-			// drm_dbg(obj->base.dev,
-			// 	"map dmabuf: "
-			// 	"region_start = %llu, "
-			// 	"io_start = %llu, "
-			// 	"sg_dma_address(src) = %llx, "
-			// 	"sg_dma_len(src) = %u\n",
-			// 	region_start, mem->io_start,
-			// 	sg_dma_address(src), sg_dma_len(src));
 
 			if (map_dir == DMA_NONE) {
 				addr = sg_dma_address(src);

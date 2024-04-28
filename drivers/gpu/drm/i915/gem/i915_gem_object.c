@@ -1236,6 +1236,7 @@ int i915_gem_object_migrate(struct drm_i915_gem_object *obj,
 	struct drm_i915_gem_object *donor;
 	int madv = I915_MADV_DONTNEED;
 	int err = 0;
+	struct i915_gem_ww_ctx ww1, *ww = &ww1;
 
 	assert_object_held(obj);
 
@@ -1251,12 +1252,6 @@ int i915_gem_object_migrate(struct drm_i915_gem_object *obj,
 
 	if (obj->swapto && obj->swapto->mm.madv == __I915_MADV_PURGED)
 		i915_gem_object_put(fetch_and_zero(&obj->swapto));
-
-	if (id == INTEL_REGION_SMEM) {
-		err = __i915_gem_object_put_pages(obj);
-		if (err)
-			return err;
-	}
 
 	/*
 	 * Notify anyone who is interested that the pages will need to be
@@ -1295,14 +1290,17 @@ int i915_gem_object_migrate(struct drm_i915_gem_object *obj,
 		madv = I915_MADV_WILLNEED;
 	} else if (i915_gem_object_has_pages(obj)) { /* lmem <-> lmem */
 		struct i915_request *rq;
-
-		rq = i915_gem_object_copy_lmem(obj, donor, true, nowait);
-		if (IS_ERR(rq)) {
-			err = PTR_ERR(rq);
-			goto out;
+		for_i915_gem_ww(ww, err, true) {
+			rq = i915_gem_object_copy_lmem(obj, donor, true, nowait);
+			if (IS_ERR(rq)) {
+				err = PTR_ERR(rq);
+				goto out;
+			}
+			i915_gem_object_wait(donor, 0, MAX_SCHEDULE_TIMEOUT);
+			i915_gem_object_unbind(donor, ww, 0);
+			i915_gem_object_unbind(obj, ww, I915_GEM_OBJECT_UNBIND_ACTIVE);
+			i915_request_put(rq);
 		}
-
-		i915_request_put(rq);
 	}
 
 	trace_i915_gem_object_migrate(obj, donor->mm.region.mem);
