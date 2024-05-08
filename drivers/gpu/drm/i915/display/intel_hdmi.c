@@ -734,7 +734,7 @@ intel_hdmi_compute_avi_infoframe(struct intel_encoder *encoder,
 	else
 		frame->colorspace = HDMI_COLORSPACE_RGB;
 
-	drm_hdmi_avi_infoframe_colorspace(frame, conn_state);
+	drm_hdmi_avi_infoframe_colorimetry(frame, conn_state);
 
 	/* nonsense combination */
 	drm_WARN_ON(encoder->base.dev, crtc_state->limited_color_range &&
@@ -2669,9 +2669,9 @@ bool intel_hdmi_handle_sink_scrambling(struct intel_encoder *encoder,
 		    str_yes_no(scrambling), high_tmds_clock_ratio ? 40 : 10);
 
 	/* Set TMDS bit clock ratio to 1/40 or 1/10, and enable/disable scrambling */
-	return drm_scdc_set_high_tmds_clock_ratio(adapter,
-						  high_tmds_clock_ratio) &&
-		drm_scdc_set_scrambling(adapter, scrambling);
+	return drm_scdc_set_high_tmds_clock_ratio(connector, high_tmds_clock_ratio) &&
+		drm_scdc_set_scrambling(connector, scrambling);
+
 }
 
 static u8 chv_port_to_ddc_pin(struct drm_i915_private *dev_priv, enum port port)
