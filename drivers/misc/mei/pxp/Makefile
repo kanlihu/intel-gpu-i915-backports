@@ -4,4 +4,5 @@
 #
 # Makefile - PXP client driver for Intel MEI Bus Driver.
 
+include $(BACKPORT_DIR)/.config
 obj-$(CPTCFG_INTEL_MEI_PXP) += mei_pxp.o

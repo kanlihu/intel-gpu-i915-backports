@@ -12,6 +12,7 @@
 # Note the danger in using -Wall -Wextra is that when CI updates gcc we
 # will most likely get a sudden build breakage... Hopefully we will fix
 # new warnings before CI updates!
+include $(BACKPORT_DIR)/.config
 subdir-ccflags-y := -Wall -Wextra
 subdir-ccflags-y += -Wno-format-security
 subdir-ccflags-y += -Wno-unused-parameter
@@ -409,8 +410,8 @@ obj-$(CPTCFG_DRM_I915) += i915.o
 obj-$(CPTCFG_DRM_I915_GVT_KVMGT) += gvt/kvmgt.o
 obj-$(CPTCFG_DRM_I915_INTEL_FABRIC) += fabric/
 
-obj-m += i915_spi.o
-i915_spi-y := spi/intel_spi_drv.o
+#obj-m += i915_spi.o
+#i915_spi-y := spi/intel_spi_drv.o
 
 # header test
 

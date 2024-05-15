@@ -5,6 +5,7 @@
 # Intel Connectivity fabric driver
 #
 
+include $(BACKPORT_DIR)/.config
 obj-$(CPTCFG_DRM_I915_INTEL_FABRIC) += iaf.o
 
 iaf-y := debugfs.o \

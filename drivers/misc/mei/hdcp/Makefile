@@ -4,4 +4,5 @@
 #
 # Makefile - HDCP client driver for Intel MEI Bus Driver.
 
+include $(BACKPORT_DIR)/.config
 obj-$(CPTCFG_INTEL_MEI_HDCP) += mei_hdcp.o

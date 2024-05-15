@@ -4,6 +4,7 @@
 #
 # Makefile - IAF client driver for Intel MEI Bus Driver.
 
+include $(BACKPORT_DIR)/.config
 subdir-ccflags-y += -I$(backport_srctree)/drivers/misc/mei/
 
 obj-$(CPTCFG_INTEL_MEI_IAF) += mei_iaf.o

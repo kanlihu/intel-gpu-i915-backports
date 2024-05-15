@@ -1,3 +1,5 @@
+include $(BACKPORT_DIR)/.config
+
 ccflags-y += -I$(src) -Wframe-larger-than=1280
 ifeq ($(CONFIG_BACKPORT_INTEGRATE),)
 obj-m += compat.o

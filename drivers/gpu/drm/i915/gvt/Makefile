@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: GPL-2.0
+include $(BACKPORT_DIR)/.config
 
 i915-$(CPTCFG_DRM_I915_GVT) += \
 	gvt/aperture_gm.o \

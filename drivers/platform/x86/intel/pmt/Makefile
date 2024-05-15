@@ -4,6 +4,8 @@
 # Intel Platform Monitoring Technology Drivers
 #
 
+include $(BACKPORT_DIR)/.config
+
 obj-$(CPTCFG_INTEL_PMT_CLASS)		+= pmt_class.o
 pmt_class-y				:= class.o
 obj-$(CPTCFG_INTEL_PMT_TELEMETRY)	+= pmt_telemetry.o

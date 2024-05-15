@@ -3,6 +3,7 @@
 # Copyright (c) 2010-2019, Intel Corporation. All rights reserved.
 # Makefile - Intel Management Engine Interface (Intel MEI) Linux driver
 #
+include $(BACKPORT_DIR)/.config
 obj-$(CPTCFG_INTEL_MEI) += mei.o
 mei-objs := init.o
 mei-objs += hbm.o
