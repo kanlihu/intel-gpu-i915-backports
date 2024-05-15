@@ -1380,17 +1380,23 @@ static const struct pci_device_id pciidlist[] = {
 	INTEL_ICL_11_IDS(&icl_info),
 	INTEL_EHL_IDS(&ehl_info),
 	INTEL_JSL_IDS(&jsl_info),
+#if 0
 	INTEL_TGL_12_IDS(&tgl_info),
 	INTEL_RKL_IDS(&rkl_info),
 	INTEL_ADLS_IDS(&adl_s_info),
 	INTEL_ADLP_IDS(&adl_p_info),
 	INTEL_ADLN_IDS(&adl_p_info),
+#endif
 	INTEL_DG1_IDS(&dg1_info),
+#if 0
 	INTEL_RPLS_IDS(&adl_s_info),
 	INTEL_RPLP_IDS(&adl_p_info),
+#endif
 	INTEL_DG2_IDS(&dg2_info),
 	INTEL_ATS_M_IDS(&ats_m_info),
+#if 0
 	INTEL_MTL_IDS(&mtl_info),
+#endif
 	INTEL_PVC_IDS(&pvc_info),
 	{0, 0, 0}
 };
