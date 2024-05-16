@@ -4357,7 +4357,7 @@ static int i915_perf_mmap(struct file *file, struct vm_area_struct *vma)
 				     VM_SHARED | VM_MAYSHARE))
 			return -EINVAL;
 
-		vm_flags_mod(vma, 0, (VM_MAYWRITE | VM_MAYEXEC));
+		vma->vm_flags &= ~(VM_MAYWRITE | VM_MAYEXEC);
 
 		/*
 		 * If the privileged parent forks and child drops root
@@ -4365,7 +4365,8 @@ static int i915_perf_mmap(struct file *file, struct vm_area_struct *vma)
 		 * mapped OA buffer. Explicitly set VM_DONTCOPY to avoid such
 		 * cases.
 		 */
-		vm_flags_mod(vma, (VM_PFNMAP | VM_DONTEXPAND | VM_DONTDUMP | VM_DONTCOPY), 0);
+		vma->vm_flags |= VM_PFNMAP | VM_DONTEXPAND |
+				 VM_DONTDUMP | VM_DONTCOPY;
 		break;
 
 	default:
