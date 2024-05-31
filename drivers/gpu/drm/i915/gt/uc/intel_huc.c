@@ -110,11 +110,13 @@ static int check_huc_loading_mode(struct intel_huc *huc)
 	}
 
 	/* make sure we can access the GSC via the mei driver if we need it */
+#if 0
 	if (!(IS_ENABLED(CPTCFG_INTEL_MEI_PXP) && IS_ENABLED(CPTCFG_INTEL_MEI_GSC)) &&
 	    fw_needs_gsc) {
 		huc_info(huc, "can't load due to missing MEI modules\n");
 		return -EIO;
 	}
+#endif
 
 	huc_dbg(huc, "loaded by GSC = %s\n", str_yes_no(fw_needs_gsc));
 
