@@ -4,4 +4,5 @@
 #
 # Makefile - GSC Proxy client driver for Intel MEI Bus Driver.
 
+include $(BACKPORT_DIR)/.config
 obj-$(CPTCFG_INTEL_MEI_GSC_PROXY) += mei_gsc_proxy.o
