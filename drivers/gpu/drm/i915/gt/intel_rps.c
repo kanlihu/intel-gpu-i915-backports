@@ -2878,7 +2878,7 @@ unsigned long i915_read_mch_val(void)
 	drm_dev_put(&i915->drm);
 	return chipset_val + graphics_val;
 }
-EXPORT_SYMBOL_GPL(i915_read_mch_val);
+//EXPORT_SYMBOL_GPL(i915_read_mch_val);
 
 /**
  * i915_gpu_raise - raise GPU frequency limit
@@ -2904,7 +2904,7 @@ bool i915_gpu_raise(void)
 	drm_dev_put(&i915->drm);
 	return true;
 }
-EXPORT_SYMBOL_GPL(i915_gpu_raise);
+//EXPORT_SYMBOL_GPL(i915_gpu_raise);
 
 /**
  * i915_gpu_lower - lower GPU frequency limit
@@ -2931,7 +2931,7 @@ bool i915_gpu_lower(void)
 	drm_dev_put(&i915->drm);
 	return true;
 }
-EXPORT_SYMBOL_GPL(i915_gpu_lower);
+//EXPORT_SYMBOL_GPL(i915_gpu_lower);
 
 /**
  * i915_gpu_busy - indicate GPU business to IPS
@@ -2952,7 +2952,7 @@ bool i915_gpu_busy(void)
 	drm_dev_put(&i915->drm);
 	return ret;
 }
-EXPORT_SYMBOL_GPL(i915_gpu_busy);
+//EXPORT_SYMBOL_GPL(i915_gpu_busy);
 
 /**
  * i915_gpu_turbo_disable - disable graphics turbo
@@ -2980,7 +2980,7 @@ bool i915_gpu_turbo_disable(void)
 	drm_dev_put(&i915->drm);
 	return ret;
 }
-EXPORT_SYMBOL_GPL(i915_gpu_turbo_disable);
+//EXPORT_SYMBOL_GPL(i915_gpu_turbo_disable);
 
 #if IS_ENABLED(CPTCFG_DRM_I915_SELFTEST)
 #include "selftest_rps.c"
