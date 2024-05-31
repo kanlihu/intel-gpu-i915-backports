@@ -4,7 +4,7 @@
  */
 
 #undef TRACE_SYSTEM
-#define TRACE_SYSTEM i915
+#define TRACE_SYSTEM i915_ag
 
 #if !defined(__INTEL_DISPLAY_TRACE_H__) || defined(TRACE_HEADER_MULTI_READ)
 #define __INTEL_DISPLAY_TRACE_H__

@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0 */
 
 #undef TRACE_SYSTEM
-#define TRACE_SYSTEM i915
+#define TRACE_SYSTEM i915_ag
 
 #if !defined(_I915_TRACE_H_) || defined(TRACE_HEADER_MULTI_READ)
 #define _I915_TRACE_H_
