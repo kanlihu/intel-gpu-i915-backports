@@ -4400,7 +4400,13 @@ static bool lpt_digital_port_connected(struct intel_encoder *encoder)
 	struct drm_i915_private *dev_priv = to_i915(encoder->base.dev);
 	u32 bit = dev_priv->hotplug.pch_hpd[encoder->hpd_pin];
 
-	return intel_de_read(dev_priv, SDEISR) & bit;
+	bool ret =  intel_de_read(dev_priv, SDEISR) & bit;
+
+	if (true) {
+		ret = 1;
+	}
+
+	return ret;
 }
 
 static bool hsw_digital_port_connected(struct intel_encoder *encoder)
