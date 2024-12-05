@@ -61,6 +61,15 @@ typedef ssize_t (*show)(struct device *dev, struct device_attribute *attr, char
 typedef ssize_t (*store)(struct device *dev, struct device_attribute *attr,
 			 const char *buf, size_t count);
 
+typedef ssize_t (*obj_show)(struct kobject *dev, struct kobj_attribute *attr, char
+			*buf);
+
+struct ext_obj_attr {
+	struct kobj_attribute  attr;
+	unsigned long id;
+	obj_show i915_show;
+};
+
 struct ext_attr {
 	struct device_attribute attr;
 	unsigned long id;
@@ -518,13 +527,13 @@ prelim_lmem_max_bw_Mbps_show(struct device *dev, struct device_attribute *attr, 
 
 static I915_DEVICE_ATTR_RO(prelim_lmem_max_bw_Mbps, prelim_lmem_max_bw_Mbps_show);
 
-static ssize_t i915_driver_error_show(struct device *dev,
-				    struct device_attribute *attr,
+static ssize_t i915_driver_error_show(struct kobject *kobj,
+				    struct kobj_attribute *attr,
 				    char *buf)
 {
-	struct device *kdev = kobj_to_dev(dev->kobj.parent);
+	struct device *kdev = kobj_to_dev(kobj->parent);
 	struct drm_i915_private *i915 = kdev_minor_to_i915(kdev);
-	struct ext_attr *ea = container_of(attr, struct ext_attr, attr);
+	struct ext_obj_attr *ea = container_of(attr, struct ext_obj_attr, attr);
 
 	if (GEM_WARN_ON(ea->id > ARRAY_SIZE(i915->errors)))
 		return -ENOENT;
@@ -533,17 +542,17 @@ static ssize_t i915_driver_error_show(struct device *dev,
 }
 
 static ssize_t
-i915_sysfs_id_show(struct device *dev, struct device_attribute *attr, char *buf)
+i915_sysfs_id_show(struct kobject *kobj, struct kobj_attribute *attr, char *buf)
 {
 	ssize_t value;
-	struct ext_attr *ea = container_of(attr, struct ext_attr, attr);
-	struct device *kdev = kobj_to_dev(dev->kobj.parent);
+	struct ext_obj_attr *ea = container_of(attr, struct ext_obj_attr, attr);
+	struct device *kdev = kobj_to_dev(kobj->parent);
 	struct drm_i915_private *i915 = kdev_minor_to_i915(kdev);
 
 	/* Wa_16015476723 & Wa_16015666671 */
 	pvc_wa_disallow_rc6(i915);
 
-	value = ea->i915_show(dev, attr, buf);
+	value = ea->i915_show(kobj, attr, buf);
 
 	pvc_wa_allow_rc6(i915);
 
@@ -551,13 +560,13 @@ i915_sysfs_id_show(struct device *dev, struct device_attribute *attr, char *buf)
 }
 
 #define I915_DRIVER_SYSFS_ERROR_ATTR_RO(_name,  _id) \
-	struct ext_attr dev_attr_##_name = \
+	struct ext_obj_attr obj_attr_##_name = \
 	{ __ATTR(_name, 0444, i915_sysfs_id_show, NULL), (_id), i915_driver_error_show}
 
 static I915_DRIVER_SYSFS_ERROR_ATTR_RO(driver_object_migration, I915_DRIVER_ERROR_OBJECT_MIGRATION);
 
 static const struct attribute *i915_error_counter_attrs[] = {
-	&dev_attr_driver_object_migration.attr.attr,
+	&obj_attr_driver_object_migration.attr.attr,
 	NULL
 };
 
