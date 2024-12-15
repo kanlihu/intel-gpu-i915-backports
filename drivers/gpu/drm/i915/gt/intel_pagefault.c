@@ -69,7 +69,8 @@ void intel_gt_pagefault_process_cat_error_msg(struct intel_gt *gt, u32 guc_ctx_i
 	ce = xa_load(&gt->uc.guc.context_lookup, guc_ctx_id);
 	if (ce && ce->gem_context) {
 		memcpy(name, ce->gem_context->name, sizeof(name));
-		intel_context_ban(ce, NULL);
+		if (!intel_context_is_banned(ce))
+		    intel_context_ban(ce, NULL);
 	}
 
 	trace_intel_gt_cat_error(gt, name);
