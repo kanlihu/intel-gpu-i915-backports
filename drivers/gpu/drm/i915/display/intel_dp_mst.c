@@ -74,7 +74,7 @@ static int intel_dp_mst_compute_link_config(struct intel_encoder *encoder,
 
 #ifdef BPM_DRM_DP_MST_PORT_VCPI_NOT_PRESENT
 	// TODO: Handle pbn_div changes by adding a new MST helper
-	if (!mst_state->pbn_div) {
+	if (!mst_state->pbn_div.full) {
 		mst_state->pbn_div = drm_dp_get_vc_payload_bw(&intel_dp->mst_mgr,
 							      limits->max_rate,
 							      limits->max_lane_count);

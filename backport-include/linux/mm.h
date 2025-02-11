@@ -85,4 +85,7 @@ int backport_register_shrinker(struct shrinker *shrinker);
 #endif
 
 #endif /* FOLIO_ADDRESS_PRESENT */
+#ifdef BPM_FOLL_FAST_ONLY_NOT_PRESENT
+#define FOLL_FAST_ONLY 0x80000 /* gup_fast: prevent fall-back to slow gup */
+#endif
 #endif /* __BACKPORT_MM_H */

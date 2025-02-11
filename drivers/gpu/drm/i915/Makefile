@@ -28,6 +28,8 @@ subdir-ccflags-$(CPTCFG_DRM_I915_WERROR) += -Werror
 CFLAGS_i915_pci.o = $(call cc-disable-warning, override-init)
 CFLAGS_display/intel_fbdev.o = $(call cc-disable-warning, override-init)
 
+export src = $(BACKPORT_DIR)/drivers/gpu/drm/i915/
+
 subdir-ccflags-y += -I$(src)
 
 # Please keep these build lists sorted!

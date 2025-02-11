@@ -34,8 +34,13 @@ struct sysrq_cb {
 	void (*fn)(void *data);
 	void *data;
 };
+#ifdef BPM_SYSRQ_KEY_OP_HANDLER_INT_ARG_NOT_PRESENT
+typedef u8 sysrq_key;
+#else
+typedef int sysrq_key;
+#endif
 
-static void sysrq_handle_showgpu(int key)
+static void sysrq_handle_showgpu(sysrq_key key)
 {
 	struct sysrq_cb *cb;
 
@@ -45,7 +50,11 @@ static void sysrq_handle_showgpu(int key)
 	rcu_read_unlock();
 }
 
+#ifdef BPM_CONST_SYSRQ_KEY_OP_NOT_PRESENT
+static struct sysrq_key_op sysrq_showgpu_op = {
+#else
 static const struct sysrq_key_op sysrq_showgpu_op = {
+#endif
         .handler        = sysrq_handle_showgpu,
         .help_msg       = "show-gpu(G)",
         .action_msg     = "Show GPU state",

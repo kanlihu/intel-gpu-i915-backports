@@ -5533,25 +5533,30 @@ static struct ctl_table oa_table[] = {
 	{}
 };
 
-static struct ctl_table i915_root[] = {
-	{
-	 .procname = "i915_ag",
-	 .maxlen = 0,
-	 .mode = 0555,
-	 .child = oa_table,
-	 },
-	{}
-};
 
-static struct ctl_table dev_root[] = {
-	{
-	 .procname = "dev",
-	 .maxlen = 0,
-	 .mode = 0555,
-	 .child = i915_root,
-	 },
-	{}
+#ifndef BPM_REGISTER_SYSCTL_TABLE_NOT_PRESENT
+static struct ctl_table i915_root[] = {
+    {
+     .procname = "i915_ag",
+     .maxlen = 0,
+     .mode = 0555,
+     .child = oa_table,
+     },
+    {}
 };
+#endif
+
+#ifndef BPM_REGISTER_SYSCTL_TABLE_NOT_PRESENT
+static struct ctl_table dev_root[] = {
+    {
+     .procname = "dev",
+     .maxlen = 0,
+     .mode = 0555,
+     .child = i915_root,
+     },
+    {}
+};
+#endif
 
 static u32 __num_perf_groups_per_gt(struct intel_gt *gt)
 {
@@ -6146,7 +6151,11 @@ static int destroy_config(int id, void *p, void *data)
 
 int i915_perf_sysctl_register(void)
 {
-	sysctl_header = register_sysctl_table(dev_root);
+#ifdef BPM_REGISTER_SYSCTL_TABLE_NOT_PRESENT
+    sysctl_header = register_sysctl("dev/i915", oa_table);
+#else
+    sysctl_header = register_sysctl_table(dev_root);
+#endif
 	return 0;
 }
 

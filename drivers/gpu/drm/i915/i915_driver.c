@@ -43,6 +43,7 @@
 #include <linux/string_helpers.h>
 #include <linux/vga_switcheroo.h>
 #include <linux/vt.h>
+#include <linux/aer.h>
 
 #include <drm/drm_aperture.h>
 #include <drm/drm_atomic_helper.h>

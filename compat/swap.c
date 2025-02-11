@@ -24,3 +24,12 @@ void lru_cache_add(struct page *page)
 }
 EXPORT_SYMBOL(lru_cache_add);
 #endif
+
+#ifdef BPM_PAGEVEC_NOT_PRESENT
+#include<linux/pagevec.h>
+void __pagevec_release(struct pagevec *pvec)
+{
+	__folio_batch_release((struct folio_batch*)pvec);
+}
+EXPORT_SYMBOL(__pagevec_release);
+#endif

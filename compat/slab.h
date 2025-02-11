@@ -1,6 +1,19 @@
 #ifndef __BACKPORT_MM_SLAB_H
 #define __BACKPORT_MM_SLAB_H
 
+#ifdef BPM_FREELIST_ABA_T_NOT_PRESENT
+
+typedef u128 freelist_full_t;
+
+typedef union {
+        struct {
+                void *freelist;
+                unsigned long counter;
+        };
+        freelist_full_t full;
+} freelist_aba_t;
+
+#endif /* BPM_FREELIST_ABA_T_NOT_PRESENT */
 /*
  * Since kmem_cache_get_slabinfo() got introduced in KV5.10.0,
  * added check here. May need to change in future.
